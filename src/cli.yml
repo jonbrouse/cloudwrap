@@ -1,0 +1,17 @@
+name: turbine
+version: "1.0"
+author: Stephen Cirner <steve@blackfynn.com>
+about: Interfaces with AWS Secrets Manager
+subcommands:
+    - list:
+        args:
+            - environment:
+                required: true
+                index: 1
+            - service:
+                required: true
+                index: 2
+            - output:
+                short: o
+                long: output
+                takes_value: true

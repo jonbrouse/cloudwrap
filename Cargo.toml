@@ -1,0 +1,7 @@
+[package]
+name = "turbine"
+version = "0.1.0"
+authors = ["Stephen Cirner <steve@blackfynn.com>"]
+
+[dependencies]
+clap = {version = "2.31", features = ["yaml"]}
