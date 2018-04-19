@@ -1,6 +1,6 @@
 name: turbine
 version: "1.0"
-author: Stephen Cirner <steve@blackfynn.com>
+author: Stephen Cirner <scirner22@gmail.com>
 about: Interfaces with AWS Secrets Manager
 subcommands:
     - list:
