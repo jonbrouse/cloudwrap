@@ -4,4 +4,8 @@ version = "0.1.0"
 authors = ["Stephen Cirner <scirner22@gmail.com>"]
 
 [dependencies]
+chrono = "0.4"
 clap = {version = "2.31", features = ["yaml"]}
+prettytable-rs = "0.6"
+rusoto_core = "0.32"
+rusoto_ssm = "0.32"

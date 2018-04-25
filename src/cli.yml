@@ -1,17 +1,24 @@
 name: turbine
 version: "1.0"
 author: Stephen Cirner <scirner22@gmail.com>
-about: Interfaces with AWS Secrets Manager
+about: Interfaces with AWS to provide an opinionated way to manage application configuration.
+args:
+    - environment:
+        required: true
+        index: 1
+    - service:
+        required: true
+        index: 2
 subcommands:
-    - list:
+    - describe:
+        about: Prints configuration keys and extra relevant information, does not include values.
+    - stdout:
+        about: Prints configuration to stdout.
+    - file:
+        about: Prints configuration to a file.
+    - exec:
+        about: Executes the given application and provides configuration through environment variables.
         args:
-            - environment:
+            - cmd:
                 required: true
-                index: 1
-            - service:
-                required: true
-                index: 2
-            - output:
-                short: o
-                long: output
-                takes_value: true
+                help: Command to execute in a forked process.
