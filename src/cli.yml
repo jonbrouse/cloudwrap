@@ -16,6 +16,10 @@ subcommands:
         about: Prints configuration to stdout.
     - file:
         about: Prints configuration to a file.
+        args:
+            - path:
+                required: true
+                help: Path to file that will be created and seeded with the application configuration.
     - exec:
         about: Executes the given application and provides configuration through environment variables.
         args:

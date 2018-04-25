@@ -4,12 +4,14 @@ extern crate clap;
 #[macro_use]
 extern crate prettytable;
 extern crate rusoto_core;
+//extern crate rusoto_secretsmanager;
 extern crate rusoto_ssm;
 
-use std::process::Command;
+use std::{fs::File, io::prelude::*, path::PathBuf, process::Command};
 
 use clap::App;
 
+mod secretsmanager;
 mod ssm;
 mod config;
 mod output;
@@ -23,7 +25,7 @@ type Parameters = Box<Printable>;
 enum Output {
     Describe,
     Stdout,
-    File,
+    File(PathBuf),
     Exec(String),
 }
 
@@ -43,10 +45,11 @@ fn main() {
         let ssm = ssm::SsmClient::default();
         let parameters = ssm.get_parameters(&config).unwrap();
         (Output::Stdout, Box::new(parameters))
-    } else if let Some(_) = matches.subcommand_matches("file") {
+    } else if let Some(file_matches) = matches.subcommand_matches("file") {
+        let path = file_matches.value_of("path").expect("required field");
         let ssm = ssm::SsmClient::default();
         let parameters = ssm.get_parameters(&config).unwrap();
-        (Output::File, Box::new(parameters))
+        (Output::File(path.into()), Box::new(parameters))
     } else if let Some(exec_matches) = matches.subcommand_matches("exec") {
         let cmd = exec_matches.value_of("cmd").expect("required field");
         let ssm = ssm::SsmClient::default();
@@ -58,11 +61,14 @@ fn main() {
     };
 
     match output {
-        // TODO output to actual file
-        Output::File => {
+        Output::File(path) => {
+            path.parent().map(|p| if !p.exists() { panic!(format!("{:?} does not exist", p)) });
+            let mut file = File::create(path).expect("opening file");
+
             parameters.export().map(|pairs| {
                 for (k, v) in pairs {
-                    println!("export {}={}", k, v);
+                    file.write_all(format!("export {}={}\n", k, v).as_bytes())
+                        .expect("writing to file");
                 }
             });
         },

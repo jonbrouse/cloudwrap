@@ -10,7 +10,7 @@ use rusoto_ssm::{
     ParameterMetadata,
     ParameterStringFilter,
     Ssm,
-    SsmClient as Client
+    SsmClient as Client,
 };
 
 use config::Config;
