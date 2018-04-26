@@ -26,10 +26,10 @@ Describe keys for a service:
 
 ```
 $ cloudwrap staging service-name-test describe
- KEY | VERSION | LAST_MODIFIED_USER  | LAST_MODIFIED_DATE
------+---------+---------------------+---------------------
+ KEY | VERSION |  LAST_MODIFIED_USER   | LAST_MODIFIED_DATE
+-----+---------+-----------------------+---------------------
  one |       1 | vienna@cloudwrap.com  | 2018-04-24 19:36:02
- two |       1 | lochy@cloudwrap.com   | 2018-04-24 19:36:16
+ two |       1 | lachy@cloudwrap.com   | 2018-04-24 19:36:16
 ```
 
 Print key/value pairs for a service:
