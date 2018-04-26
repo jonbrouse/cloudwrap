@@ -2,6 +2,38 @@ use chrono::NaiveDateTime;
 use prettytable::{format, Table};
 use rusoto_ssm::{Parameter, ParameterMetadata};
 
+fn split_take_last(ch: char, field: Option<String>) -> String {
+    field
+        .and_then(|f| f.split(ch).collect::<Vec<&str>>().pop().map(Into::into))
+        .unwrap_or("".into())
+}
+
+trait Service {
+    fn get_service_name(&self) -> String;
+}
+
+impl Service for Parameter {
+    fn get_service_name(&self) -> String {
+        split_take_last('/', self.name.clone())
+    }
+}
+
+impl Service for ParameterMetadata {
+    fn get_service_name(&self) -> String {
+        split_take_last('/', self.name.clone())
+    }
+}
+
+trait UserCreation {
+    fn last_modified_user(&self) -> String;
+}
+
+impl UserCreation for ParameterMetadata {
+    fn last_modified_user(&self) -> String {
+        split_take_last('/', self.last_modified_user.clone())
+    }
+}
+
 pub trait Printable {
     fn get_table(&self) -> Table;
     fn export(&self) -> Option<Vec<(String, String)>>;
@@ -14,8 +46,7 @@ impl Printable for Vec<Parameter> {
         table.set_titles(row!["KEY", "VALUE"]);
 
         for p in self.into_iter() {
-            let key = p.name.clone().unwrap();
-            let key: String = key.split('/').collect::<Vec<&str>>().pop().unwrap().into();
+            let key = p.get_service_name();
             let value = p.value.clone().unwrap();
 
             table.add_row(row![key, value]);
@@ -28,8 +59,7 @@ impl Printable for Vec<Parameter> {
         let mut pairs = Vec::new();
 
         for p in self.into_iter() {
-            let key = p.name.clone().unwrap();
-            let key: String = key.split('/').collect::<Vec<&str>>().pop().unwrap().into();
+            let key = p.get_service_name();
             let key = key.to_uppercase().replace("-", "_");
             let value = p.value.clone().unwrap();
 
@@ -47,10 +77,8 @@ impl Printable for Vec<ParameterMetadata> {
         table.set_titles(row![c => "KEY", "VERSION", "LAST_MODIFIED_USER", "LAST_MODIFIED_DATE"]);
 
         for p in self.into_iter() {
-            let key = p.name.clone().unwrap();
-            let key: String = key.split('/').collect::<Vec<&str>>().pop().unwrap().into();
-            let user = p.last_modified_user.clone().unwrap();
-            let user: String = user.split('/').collect::<Vec<&str>>().pop().unwrap().into();
+            let key = p.get_service_name();
+            let user = p.last_modified_user();
             let version = p.version.unwrap_or(0);
             let date = p.last_modified_date.unwrap();
             let date = NaiveDateTime::from_timestamp(date.floor() as i64, 0);
