@@ -1,7 +1,13 @@
 [package]
-name = "turbine"
-version = "0.1.0"
+name = "cloudwrap"
+version = "0.0.1"
 authors = ["Stephen Cirner <scirner22@gmail.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/scirner22/cloudwrap"
+homepage = "https://github.com/scirner22/cloudwrap"
+description = """
+Wrapper utility that injects configuration fields into an executable command.
+"""
 
 [dependencies]
 chrono = "0.4"
