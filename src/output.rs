@@ -15,7 +15,7 @@ impl Printable for Vec<Parameter> {
 
         for p in self.into_iter() {
             let key = p.name.clone().unwrap();
-            let key: String = key.split("/").collect::<Vec<&str>>().pop().unwrap().into();
+            let key: String = key.split('/').collect::<Vec<&str>>().pop().unwrap().into();
             let value = p.value.clone().unwrap();
 
             table.add_row(row![key, value]);
@@ -29,11 +29,11 @@ impl Printable for Vec<Parameter> {
 
         for p in self.into_iter() {
             let key = p.name.clone().unwrap();
-            let key: String = key.split("/").collect::<Vec<&str>>().pop().unwrap().into();
+            let key: String = key.split('/').collect::<Vec<&str>>().pop().unwrap().into();
             let key = key.to_uppercase().replace("-", "_");
             let value = p.value.clone().unwrap();
 
-            pairs.push((key.into(), value.into()));
+            pairs.push((key, value));
         }
 
         Some(pairs)
@@ -48,9 +48,9 @@ impl Printable for Vec<ParameterMetadata> {
 
         for p in self.into_iter() {
             let key = p.name.clone().unwrap();
-            let key: String = key.split("/").collect::<Vec<&str>>().pop().unwrap().into();
+            let key: String = key.split('/').collect::<Vec<&str>>().pop().unwrap().into();
             let user = p.last_modified_user.clone().unwrap();
-            let user: String = user.split("/").collect::<Vec<&str>>().pop().unwrap().into();
+            let user: String = user.split('/').collect::<Vec<&str>>().pop().unwrap().into();
             let version = p.version.unwrap_or(0);
             let date = p.last_modified_date.unwrap();
             let date = NaiveDateTime::from_timestamp(date.floor() as i64, 0);

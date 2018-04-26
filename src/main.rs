@@ -37,32 +37,37 @@ fn main() {
     let service = matches.value_of("service").expect("required field");
     let config = Config::new(environment, service);
 
-    let (output, parameters): (_, Parameters) = if let Some(_) = matches.subcommand_matches("describe") {
-        let ssm = ssm::SsmClient::default();
-        let parameters = ssm.describe_parameters(&config).unwrap();
-        (Output::Describe, Box::new(parameters))
-    } else if let Some(_) = matches.subcommand_matches("stdout") {
-        let ssm = ssm::SsmClient::default();
-        let parameters = ssm.get_parameters(&config).unwrap();
-        (Output::Stdout, Box::new(parameters))
-    } else if let Some(file_matches) = matches.subcommand_matches("file") {
-        let path = file_matches.value_of("path").expect("required field");
-        let ssm = ssm::SsmClient::default();
-        let parameters = ssm.get_parameters(&config).unwrap();
-        (Output::File(path.into()), Box::new(parameters))
-    } else if let Some(exec_matches) = matches.subcommand_matches("exec") {
-        let cmd = exec_matches.value_of("cmd").expect("required field");
-        let ssm = ssm::SsmClient::default();
-        let parameters = ssm.get_parameters(&config).unwrap();
-        (Output::Exec(cmd.into()), Box::new(parameters))
-    } else {
-        // TODO this isn't really unreachable, figure out way to guarantee that in clap
-        unreachable!()
-    };
+    let (output, parameters): (_, Parameters) =
+        if matches.subcommand_matches("describe").is_some() {
+            let ssm = ssm::SsmClient::default();
+            let parameters = ssm.describe_parameters(&config).unwrap();
+            (Output::Describe, Box::new(parameters))
+        } else if matches.subcommand_matches("stdout").is_some() {
+            let ssm = ssm::SsmClient::default();
+            let parameters = ssm.get_parameters(&config).unwrap();
+            (Output::Stdout, Box::new(parameters))
+        } else if let Some(file_matches) = matches.subcommand_matches("file") {
+            let path = file_matches.value_of("path").expect("required field");
+            let ssm = ssm::SsmClient::default();
+            let parameters = ssm.get_parameters(&config).unwrap();
+            (Output::File(path.into()), Box::new(parameters))
+        } else if let Some(exec_matches) = matches.subcommand_matches("exec") {
+            let cmd = exec_matches.value_of("cmd").expect("required field");
+            let ssm = ssm::SsmClient::default();
+            let parameters = ssm.get_parameters(&config).unwrap();
+            (Output::Exec(cmd.into()), Box::new(parameters))
+        } else {
+            // TODO this isn't really unreachable, figure out way to guarantee that in clap
+            unreachable!()
+        };
 
     match output {
         Output::File(path) => {
-            path.parent().map(|p| if !p.exists() { panic!(format!("{:?} does not exist", p)) });
+            path.parent().map(|p| {
+                if !p.exists() {
+                    panic!(format!("{:?} does not exist", p))
+                }
+            });
             let mut file = File::create(path).expect("opening file");
 
             parameters.export().map(|pairs| {
@@ -71,22 +76,20 @@ fn main() {
                         .expect("writing to file");
                 }
             });
-        },
-        Output::Exec(cmd) => {
-            match parameters.export() {
-                Some(parameters) => {
-                    Command::new(&cmd)
-                        .env_clear()
-                        .envs(parameters)
-                        .spawn()
-                        .expect(&format!("failed to start {}", cmd));
-                },
-                None => {
-                    Command::new(&cmd)
-                        .env_clear()
-                        .spawn()
-                        .expect(&format!("failed to start {}", cmd));
-                },
+        }
+        Output::Exec(cmd) => match parameters.export() {
+            Some(parameters) => {
+                Command::new(&cmd)
+                    .env_clear()
+                    .envs(parameters)
+                    .spawn()
+                    .expect(&format!("failed to start {}", cmd));
+            }
+            None => {
+                Command::new(&cmd)
+                    .env_clear()
+                    .spawn()
+                    .expect(&format!("failed to start {}", cmd));
             }
         },
         _ => parameters.get_table().printstd(),

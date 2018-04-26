@@ -1,17 +1,7 @@
 use rusoto_core::Region;
-use rusoto_ssm::{
-    DescribeParametersError,
-    DescribeParametersRequest,
-    DescribeParametersResult,
-    GetParametersByPathError,
-    GetParametersByPathRequest,
-    GetParametersByPathResult,
-    Parameter,
-    ParameterMetadata,
-    ParameterStringFilter,
-    Ssm,
-    SsmClient as Client,
-};
+use rusoto_ssm::{DescribeParametersError, DescribeParametersRequest, DescribeParametersResult,
+                 GetParametersByPathError, GetParametersByPathRequest, GetParametersByPathResult,
+                 Parameter, ParameterMetadata, ParameterStringFilter, Ssm, SsmClient as Client};
 
 use config::Config;
 
@@ -27,7 +17,9 @@ impl Default for SsmClient {
 
 impl SsmClient {
     pub fn new(region: Region) -> Self {
-        SsmClient { inner: Client::simple(region) }
+        SsmClient {
+            inner: Client::simple(region),
+        }
     }
 
     fn initial_describe_request(&self, config: &Config) -> DescribeParametersRequest {
@@ -41,13 +33,18 @@ impl SsmClient {
         req
     }
 
-    pub fn describe_parameters(&self, config: &Config) -> Result<Vec<ParameterMetadata>, DescribeParametersError> {
+    pub fn describe_parameters(
+        &self,
+        config: &Config,
+    ) -> Result<Vec<ParameterMetadata>, DescribeParametersError> {
         let mut parameters = Vec::new();
         let mut req = self.initial_describe_request(config);
 
         loop {
             let res = self.inner.describe_parameters(&req).sync()?;
-            res.parameters.clone().map(|mut p| parameters.append(&mut p));
+            res.parameters
+                .clone()
+                .map(|mut p| parameters.append(&mut p));
             let res = Into::<WrappedDescribeParametersResult>::into(res);
 
             match Into::<Option<DescribeParametersRequest>>::into(res) {
@@ -64,13 +61,18 @@ impl SsmClient {
         req
     }
 
-    pub fn get_parameters(&self, config: &Config) -> Result<Vec<Parameter>, GetParametersByPathError> {
+    pub fn get_parameters(
+        &self,
+        config: &Config,
+    ) -> Result<Vec<Parameter>, GetParametersByPathError> {
         let mut parameters = Vec::new();
         let mut req = self.initial_get_request(config);
 
         loop {
             let res = self.inner.get_parameters_by_path(&req).sync()?;
-            res.parameters.clone().map(|mut p| parameters.append(&mut p));
+            res.parameters
+                .clone()
+                .map(|mut p| parameters.append(&mut p));
             let res = Into::<WrappedGetParametersByPathResult>::into(res);
 
             match Into::<Option<GetParametersByPathRequest>>::into(res) {
