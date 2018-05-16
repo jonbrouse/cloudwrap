@@ -1,6 +1,7 @@
 extern crate chrono;
 #[macro_use]
 extern crate clap;
+extern crate openssl_probe;
 #[macro_use]
 extern crate prettytable;
 extern crate rusoto_core;
@@ -88,7 +89,8 @@ where
     Ok(())
 }
 
-fn output_exec(config: &Config, cmd: &str) -> Result<()> {
+fn output_exec(config: &Config, cmd_args: &mut Vec<&str>) -> Result<()> {
+    let cmd = cmd_args.remove(0);
     let mut parameters = Vec::new();
     let ssm = ssm::SsmClient::default();
     let ssm = ssm.get_parameters(config)?;
@@ -100,19 +102,22 @@ fn output_exec(config: &Config, cmd: &str) -> Result<()> {
         .export()
         .map(|mut pairs| parameters.append(&mut pairs));
 
-    if parameters.is_empty() {
-        Command::new(cmd)
-            .env_clear()
-            .spawn()
-            .map(|_| ())
-            .map_err(Into::into)
+    let mut spawn = Command::new(cmd);
+
+    if !parameters.is_empty() {
+        spawn.envs(parameters);
+    }
+
+    if !cmd_args.is_empty() {
+        spawn.args(cmd_args);
+    }
+
+    let status = spawn.status()?;
+
+    if status.success() {
+        Ok(())
     } else {
-        Command::new(cmd)
-            .env_clear()
-            .envs(parameters)
-            .spawn()
-            .map(|_| ())
-            .map_err(Into::into)
+        Err(Error::ExecError)
     }
 }
 
@@ -135,6 +140,8 @@ fn output_shell(config: &Config, key: &str) -> Result<()> {
 }
 
 fn main() {
+    openssl_probe::init_ssl_cert_env_vars();
+
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
 
@@ -151,9 +158,12 @@ fn main() {
 
         output_file(&config, path)
     } else if let Some(exec_matches) = matches.subcommand_matches("exec") {
-        let cmd = exec_matches.value_of("cmd").expect("required field");
+        let mut cmd = exec_matches
+            .values_of("cmd")
+            .expect("required field")
+            .collect();
 
-        output_exec(&config, cmd)
+        output_exec(&config, &mut cmd)
     } else if let Some(shell_matches) = matches.subcommand_matches("shell") {
         let key = shell_matches.value_of("key").expect("required field");
 
@@ -162,7 +172,5 @@ fn main() {
         unreachable!()
     };
 
-    if let Err(e) = result {
-        println!("{:?}", e)
-    }
+    result.unwrap()
 }
