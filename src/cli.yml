@@ -1,5 +1,5 @@
 name: cloudwrap
-version: "0.2.0"
+version: "0.2.1"
 author: Stephen Cirner <scirner22@gmail.com>
 about: Interfaces with AWS to provide an opinionated way to manage application configuration.
 args:
@@ -22,10 +22,13 @@ subcommands:
                 help: Path to file that will be created and seeded with the application configuration.
     - exec:
         about: Executes the given application and provides configuration through environment variables.
+        settings:
+            - AllowLeadingHyphen
         args:
             - cmd:
                 required: true
                 multiple: true
+                takes_value: true
                 help: Command to execute in a forked process.
     - shell:
         about: Starts a shell given the value for the key provided (Ex. a postgres config will start a postgres shell).
