@@ -128,12 +128,16 @@ fn output_shell(config: &Config, key: &str) -> Result<()> {
     if let Some(shell_config) = secret.secret_string {
         let postgres: Postgres = serde_json::from_str(&shell_config)?;
 
-        Command::new("psql")
-            .env_clear()
-            .envs(Into::<Vec<(String, String)>>::into(postgres))
-            .spawn()
-            .map(|_| ())
-            .map_err(Into::into)
+        let mut spawn = Command::new("psql");
+        spawn.envs(Into::<Vec<(String, String)>>::into(postgres));
+
+        let status = spawn.status()?;
+
+        if status.success() {
+            Ok(())
+        } else {
+            Err(Error::ExecError)
+        }
     } else {
         Err(Error::InvalidKey(format!("{}{}", config.as_path(), key)))
     }
