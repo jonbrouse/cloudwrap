@@ -1,4 +1,4 @@
-# brew install https://raw.githubusercontent.com/scirner22/cloudwrap/master/ci/homebrew_formula.rb
+# brew install https://raw.githubusercontent.com/scirner22/cloudwrap/master/ci/homebrew.rb
 
 require  'formula'
 class Homebrew < Formula
