@@ -6,7 +6,7 @@ class Homebrew < Formula
   _repo_name = 'cloudwrap'
   _bin_name = 'cloudwrap'
   homepage "https://github.com/#{_user}/#{_repo_name}"
-  _ver = '0.2.1'
+  _ver = '0.2.2'
   version _ver
 
   url "s3://data.blackfynn.io/public-downloads/#{_repo_name}/#{_bin_name}_#{_ver}_x86_64-apple-darwin.tar.gz"
