@@ -1,7 +1,7 @@
 # brew install https://raw.githubusercontent.com/scirner22/cloudwrap/master/ci/homebrew_formula.rb
 
 require  'formula'
-class Hello < Formula
+class Homebrew < Formula
   _user = 'scirner22'
   _repo_name = 'cloudwrap'
   _bin_name = 'cloudwrap'
